@@ -1,0 +1,18 @@
+{
+	"compilerOptions": {
+		"target": "ESNext",
+		"module": "NodeNext",
+		"esModuleInterop": true,
+
+		"strict": true,
+		"alwaysStrict": true,
+
+		"lib": ["ESNext", "DOM"],
+
+		"forceConsistentCasingInFileNames": true,
+
+		// "outDir": "./src"
+	},
+
+	"include": ["main.ts"]
+}
