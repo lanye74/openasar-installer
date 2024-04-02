@@ -38,7 +38,7 @@ node main.js
 ```
 
 
-Optionally, create a Powershell/batch/bash/etc. script and put in your environment so that you can easily run the script from anywhere:
+Optionally, create a Powershell/batch/bash/etc. script and put it in your environment so that you can easily run the script from anywhere:
 ```shell
 node "PATH/TO/FOLDER/openasar-installer/main.js"
 ```
