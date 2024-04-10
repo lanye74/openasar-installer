@@ -56,6 +56,10 @@ async function main() {
 	});
 
 
+	// occasionally, the above check will resolve early, so add some buffer time just in case
+	await new Promise(res => setTimeout(res, 250));
+
+
 	console.log("Closing browser...");
 	await browser.close();
 
