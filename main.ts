@@ -6,15 +6,7 @@ import watch from "node-watch";
 
 
 
-const URL = "https://openasar.dev";
-const SELECTOR = "#install-parent > div > a:last-child";
-
-const DOWNLOADED_FILE = "openasar_installer_canary.bat";
-const FILE_PATH = path.join(__dirname, DOWNLOADED_FILE);
-
-
-
-async function main() {
+async function installAndExecuteBatchScriptFromPage(pageUrl: string, downloadButtonSelector: string, downloadedFile: string, downloadDirectory: string) {
 	const timeStart = performance.now();
 
 
@@ -24,7 +16,7 @@ async function main() {
 
 	console.log("Loading page...");
 	const page = await browser.newPage();
-	await page.goto(URL);
+	await page.goto(pageUrl);
 
 
 	// ensure the file actually has permission to download
@@ -36,10 +28,10 @@ async function main() {
 
 
 
-	const downloadButton = await page.waitForSelector(SELECTOR);
+	const downloadButton = await page.waitForSelector(downloadButtonSelector);
 
 	console.log("Downloading file...")
-	await downloadButton!.evaluate(b => b.click());
+	await downloadButton!.evaluate(button => (button as HTMLAnchorElement).click());
 
 	await downloadButton!.dispose();
 
@@ -47,7 +39,7 @@ async function main() {
 	// wait for file download
 	await new Promise<void>(res => {
 		const watcher = watch(__dirname, (event, file) => {
-			if(path.basename(file) === DOWNLOADED_FILE && event === "update") {
+			if(path.basename(file) === downloadedFile && event === "update") {
 				// .crdownload has been renamed into the final file, so it's done downloading
 				watcher.close();
 				res();
@@ -63,20 +55,25 @@ async function main() {
 	console.log("Closing browser...");
 	await browser.close();
 
+
+
 	console.log("Removing pause directive...");
 
-	const installerContents = await fs.readFile(FILE_PATH, "utf8");
+	const downloadedFilePath = path.join(downloadDirectory, downloadedFile);
+
+	const installerContents = await fs.readFile(downloadedFilePath, "utf8");
 	const modifiedContents = installerContents.replace("pause\n", "");
-	await fs.writeFile(FILE_PATH, modifiedContents);
+	await fs.writeFile(downloadedFilePath, modifiedContents);
 
 
 	console.log("Executing file...");
 	// use synchronous spawning to wait until it finishes executing
-	spawnSync(FILE_PATH);
+	spawnSync(downloadedFilePath);
 
 
 	console.log("Deleting installer...");
-	await fs.rm(FILE_PATH);
+	await fs.rm(downloadedFilePath);
+
 
 
 	const timeEnd = performance.now();
@@ -87,4 +84,12 @@ async function main() {
 
 
 
-main();
+
+const PAGE_URL = "https://openasar.dev";
+const DOWNLOAD_BUTTON_SELECTOR = "#install-parent > div > a:last-child";
+
+const DOWNLOADED_FILE = "openasar_installer_canary.bat";
+const DOWNLOAD_DIRECTORY = __dirname;
+
+
+installAndExecuteBatchScriptFromPage(PAGE_URL, DOWNLOAD_BUTTON_SELECTOR, DOWNLOADED_FILE, DOWNLOAD_DIRECTORY);
