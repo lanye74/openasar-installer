@@ -84,12 +84,12 @@ async function installAndExecuteBatchScriptFromPage(pageUrl: string, downloadBut
 
 
 
-
 const PAGE_URL = "https://openasar.dev";
 const DOWNLOAD_BUTTON_SELECTOR = "#install-parent > div > a:last-child";
 
 const DOWNLOADED_FILE = "openasar_installer_canary.bat";
 const DOWNLOAD_DIRECTORY = __dirname;
+
 
 
 installAndExecuteBatchScriptFromPage(PAGE_URL, DOWNLOAD_BUTTON_SELECTOR, DOWNLOADED_FILE, DOWNLOAD_DIRECTORY);
