@@ -6,7 +6,7 @@ import watch from "node-watch";
 
 
 
-async function installAndExecuteBatchScriptFromPage(pageUrl: string, downloadButtonSelector: string, downloadedFile: string, downloadDirectory: string) {
+async function installAndExecuteBatchScriptFromPage(pageUrl: string, downloadButtonSelector: string, downloadedFileName: string, downloadDirectory: string) {
 	const timeStart = performance.now();
 
 
@@ -38,18 +38,18 @@ async function installAndExecuteBatchScriptFromPage(pageUrl: string, downloadBut
 
 	// wait for file download
 	await new Promise<void>(res => {
-		const watcher = watch(__dirname, (event, file) => {
-			if(path.basename(file) === downloadedFile && event === "update") {
+		const watcher = watch(__dirname, async (event, file) => {
+			if(path.basename(file) === downloadedFileName && event === "update") {
 				// .crdownload has been renamed into the final file, so it's done downloading
 				watcher.close();
+
+				// occasionally, the above check will resolve early, so add some buffer time just in case
+				await new Promise(res => setTimeout(res, 250));
+
 				res();
 			}
 		});
 	});
-
-
-	// occasionally, the above check will resolve early, so add some buffer time just in case
-	await new Promise(res => setTimeout(res, 250));
 
 
 	console.log("Closing browser...");
@@ -59,7 +59,7 @@ async function installAndExecuteBatchScriptFromPage(pageUrl: string, downloadBut
 
 	console.log("Removing pause directive...");
 
-	const downloadedFilePath = path.join(downloadDirectory, downloadedFile);
+	const downloadedFilePath = path.join(downloadDirectory, downloadedFileName);
 
 	const installerContents = await fs.readFile(downloadedFilePath, "utf8");
 	const modifiedContents = installerContents.replace("pause\n", "");
